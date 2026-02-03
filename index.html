@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Health Triage System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef2f7;
+      margin: 0;
+    }
+    nav {
+      background: #1e40af;
+      color: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 12px;
+    }
+    nav button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .page {
+      display: none;
+      padding: 20px;
+    }
+    .active {
+      display: block;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    input, textarea, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button.primary {
+      background: #2563eb;
+      color: white;
+      border: none;
+    }
+    .low { background:#dcfce7; padding:10px; border-radius:8px; }
+    .medium { background:#fef9c3; padding:10px; border-radius:8px; }
+    .high { background:#fee2e2; padding:10px; border-radius:8px; }
+    .ai { background:#e0f2fe; padding:10px; border-radius:8px; margin-top:10px; }
+  </style>
+</head>
+
+<body>
+
+<nav>
+  <button onclick="show('home')">Home</button>
+  <button onclick="show('triage')">AI Triage</button>
+  <button onclick="show('warning')">Early Warning</button>
+  <button onclick="show('insights')">Insights</button>
+  <button onclick="show('about')">About</button>
+</nav>
+
+<!-- HOME -->
+<div id="home" class="page active">
+  <div class="card">
+    <h2>🏥 AI Health Triage System</h2>
+    <p>
+      An AI-powered early warning and triage platform designed to identify
+      health risks early and guide timely care decisions.
+    </p>
+    <ul>
+      <li>✔ Instant risk classification</li>
+      <li>✔ Explainable AI decisions</li>
+      <li>✔ Early warning alerts</li>
+    </ul>
+  </div>
+</div>
+
+<!-- TRIAGE -->
+<div id="triage" class="page">
+  <div class="card">
+    <h2>🧠 AI Triage</h2>
+
+    <input id="temp" placeholder="Temperature (°C)">
+    <input id="hr" placeholder="Heart Rate (bpm)">
+    <textarea id="symptoms" placeholder="Symptoms"></textarea>
+
+    <select id="severity">
+      <option value="1">Mild</option>
+      <option value="2">Moderate</option>
+      <option value="3">Severe</option>
+    </select>
+
+    <button class="primary" onclick="triage()">Run AI Analysis</button>
+
+    <div id="result"></div>
+  </div>
+</div>
+
+<!-- WARNING -->
+<div id="warning" class="page">
+  <div class="card">
+    <h2>🚨 Early Warning System</h2>
+    <p>
+      This module monitors risk escalation trends and flags patients
+      who may deteriorate without intervention.
+    </p>
+    <ul>
+      <li>⚠ Vital threshold breach detection</li>
+      <li>⚠ Symptom severity escalation</li>
+      <li>⚠ AI-based deterioration prediction</li>
+    </ul>
+  </div>
+</div>
+
+<!-- INSIGHTS -->
+<div id="insights" class="page">
+  <div class="card">
+    <h2>📊 AI Insights</h2>
+    <p>
+      Explainable AI output improves trust and clinical adoption.
+    </p>
+    <ul>
+      <li>Why this risk level was assigned</li>
+      <li>Which vitals influenced the decision</li>
+      <li>How risk may evolve over time</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<div id="about" class="page">
+  <div class="card">
+    <h2>ℹ️ About & Vision</h2>
+    <p>
+      Future roadmap:
+    </p>
+    <ul>
+      <li>LLM-powered symptom reasoning</li>
+      <li>Wearable & IoT integration</li>
+      <li>Hospital dashboards</li>
+      <li>Population health analytics</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+function show(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(page).classList.add('active');
+}
+
+function triage() {
+  const t = parseFloat(temp.value);
+  const h = parseInt(hr.value);
+  const s = symptoms.value.toLowerCase();
+  const sev = parseInt(severity.value);
+
+  let score = sev;
+  if (t >= 38) score += 2;
+  if (t >= 39) score += 2;
+  if (h > 100) score += 2;
+  if (s.includes("chest") || s.includes("breath")) score += 4;
+
+  let level="Low", cls="low";
+  if (score >= 6) { level="Medium"; cls="medium"; }
+  if (score >= 10) { level="High"; cls="high"; }
+
+  result.innerHTML = `
+    <div class="${cls}">
+      <b>Risk Level:</b> ${level}<br>
+      <b>Risk Score:</b> ${score}
+    </div>
+    <div class="ai">
+      🤖 AI Explanation: Risk calculated using vitals, symptoms,
+      and severity indicators to estimate potential deterioration.
+    </div>
+  `;
+}
+</script>
+
+</body>
+</html>

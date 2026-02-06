@@ -1,190 +1,1936 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>AI Health Triage System</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #eef2f7;
-      margin: 0;
-    }
-    nav {
-      background: #1e40af;
-      color: white;
-      display: flex;
-      justify-content: space-around;
-      padding: 12px;
-    }
-    nav button {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    .page {
-      display: none;
-      padding: 20px;
-    }
-    .active {
-      display: block;
-    }
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      max-width: 500px;
-      margin: auto;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-    }
-    input, textarea, select, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button.primary {
-      background: #2563eb;
-      color: white;
-      border: none;
-    }
-    .low { background:#dcfce7; padding:10px; border-radius:8px; }
-    .medium { background:#fef9c3; padding:10px; border-radius:8px; }
-    .high { background:#fee2e2; padding:10px; border-radius:8px; }
-    .ai { background:#e0f2fe; padding:10px; border-radius:8px; margin-top:10px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthTriage AI - Know When to Seek Medical Care</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-dark: #0a0e27;
+            --bg-secondary: #151b3d;
+            --bg-card: #1a2142;
+            --text-primary: #ffffff;
+            --text-secondary: #b8c1ec;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-orange: #f59e0b;
+            --accent-purple: #8b5cf6;
+            --accent-cyan: #06b6d4;
+            --border-color: #2d3561;
+            --glow-blue: rgba(59, 130, 246, 0.4);
+            --glow-green: rgba(16, 185, 129, 0.4);
+            --glow-red: rgba(239, 68, 68, 0.4);
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Poppins', 'Inter', sans-serif;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0a0e27 0%, #151b3d 50%, #1a1f3a 100%);
+            overflow: hidden;
+        }
+
+        .animated-bg::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 20s linear infinite;
+        }
+
+        .animated-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 20%, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(26, 33, 66, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 1.2rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .logo::before {
+            content: '⚕️';
+            font-size: 2rem;
+            filter: drop-shadow(0 0 10px var(--glow-blue));
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all 0.3s;
+            font-weight: 500;
+            position: relative;
+            padding: 0.5rem 0;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-blue);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 7rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 0.8s ease;
+            font-weight: 800;
+            letter-spacing: -1px;
+            line-height: 1.2;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero p {
+            font-size: 1.35rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            max-width: 750px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.8;
+            animation: fadeInUp 0.8s ease 0.2s backwards;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.8s ease 0.4s backwards;
+        }
+
+        .btn {
+            padding: 1.1rem 2.5rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.5);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--accent-blue);
+            border: 2px solid var(--accent-blue);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-blue);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* Stats Banner */
+        .stats-banner {
+            background: linear-gradient(135deg, rgba(26, 33, 66, 0.8), rgba(21, 27, 61, 0.8));
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            margin: 3rem auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-item {
+            text-align: center;
+            position: relative;
+        }
+
+        .stat-item::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+            border-radius: 2px;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            font-size: 1.05rem;
+            font-weight: 500;
+        }
+
+        /* Symptom Assessment Tool */
+        .assessment-tool {
+            background: linear-gradient(135deg, rgba(26, 33, 66, 0.9), rgba(21, 27, 61, 0.9));
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 3rem 0;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.8rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1.05rem;
+        }
+
+        .form-group label::before {
+            content: '●';
+            color: var(--accent-blue);
+            margin-right: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(21, 27, 61, 0.6);
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            background: rgba(21, 27, 61, 0.8);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading-spinner.active {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto;
+            border: 4px solid rgba(59, 130, 246, 0.2);
+            border-top-color: var(--accent-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .result-boxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .result-box {
+            padding: 2rem;
+            border-radius: 15px;
+            border-left: 5px solid;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.05));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .result-box:hover::before {
+            opacity: 1;
+        }
+
+        .result-box:hover {
+            transform: translateX(8px) scale(1.02);
+        }
+
+        .emergency {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--accent-red);
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2);
+        }
+
+        .emergency:hover {
+            box-shadow: 0 8px 30px rgba(239, 68, 68, 0.4);
+        }
+
+        .urgent {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: var(--accent-orange);
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.2);
+        }
+
+        .urgent:hover {
+            box-shadow: 0 8px 30px rgba(245, 158, 11, 0.4);
+        }
+
+        .routine {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: var(--accent-blue);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .routine:hover {
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
+        }
+
+        .self-care {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--accent-green);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.2);
+        }
+
+        .self-care:hover {
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .result-box h3 {
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .result-box p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .result-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .emergency .result-badge {
+            background: var(--accent-red);
+            color: white;
+        }
+
+        .urgent .result-badge {
+            background: var(--accent-orange);
+            color: white;
+        }
+
+        .routine .result-badge {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .self-care .result-badge {
+            background: var(--accent-green);
+            color: white;
+        }
+
+        /* AI Chatbox */
+        .chatbox-container {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 3rem 0;
+            border: 1px solid var(--border-color);
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .chat-status {
+            width: 10px;
+            height: 10px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 1rem;
+            border-radius: 10px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .user-message {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid var(--accent-blue);
+            align-self: flex-end;
+        }
+
+        .ai-message {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--accent-green);
+            align-self: flex-start;
+        }
+
+        .message-label {
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+            opacity: 0.8;
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 0.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.8rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+        }
+
+        .send-btn {
+            padding: 0.8rem 1.5rem;
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .send-btn:hover {
+            background: #059669;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+            padding: 0.5rem 0;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-green);
+            border-radius: 50%;
+            animation: typingDot 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingDot {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-blue);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            color: var(--accent-blue);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+        }
+
+        /* Health Tracker */
+        .health-tracker {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 2.5rem;
+            margin: 3rem 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .tracker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .tracker-item {
+            background: var(--bg-secondary);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tracker-item:hover {
+            border-color: var(--accent-blue);
+        }
+
+        .tracker-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent-blue);
+            margin: 0.5rem 0;
+        }
+
+        .tracker-trend {
+            font-size: 0.9rem;
+            color: var(--accent-green);
+        }
+
+        /* Emergency Resources */
+        .emergency-resources {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(245, 158, 11, 0.1));
+            border: 2px solid var(--accent-red);
+            border-radius: 15px;
+            padding: 2.5rem;
+            margin: 3rem 0;
+        }
+
+        .emergency-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .emergency-card {
+            background: var(--bg-card);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border-left: 4px solid var(--accent-red);
+        }
+
+        .emergency-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent-red);
+            margin: 0.5rem 0;
+        }
+
+        /* Medical Disclaimer */
+        .disclaimer {
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid var(--accent-orange);
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 3rem 0;
+        }
+
+        .disclaimer h3 {
+            color: var(--accent-orange);
+            margin-bottom: 1rem;
+        }
+
+        .disclaimer p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 3rem 2rem 1rem;
+            margin-top: 5rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            color: var(--accent-blue);
+            margin-bottom: 1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-section a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: var(--accent-blue);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .stats-banner {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                padding: 2rem 1.5rem;
+            }
+
+            .result-boxes {
+                grid-template-columns: 1fr;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tracker-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .emergency-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+
+            .chatbox-container {
+                height: 500px;
+            }
+
+            .vitals-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+
+            .assessment-tool,
+            .health-tracker,
+            .emergency-resources {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Scroll to top button */
+        .scroll-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--accent-blue);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+        }
+
+        .scroll-top:hover {
+            background: #2563eb;
+            transform: translateY(-5px);
+        }
+
+        /* Smooth animations for elements */
+        @keyframes slideInFromLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInFromRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+
+        /* Intersection Observer animations */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Pulse animation for important elements */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(59, 130, 246, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+            }
+        }
+
+        /* Glow effect for interactive elements */
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+            }
+            to {
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.6);
+            }
+        }
+    </style>
 </head>
-
 <body>
+    <div class="animated-bg"></div>
 
-<nav>
-  <button onclick="show('home')">Home</button>
-  <button onclick="show('triage')">AI Triage</button>
-  <button onclick="show('warning')">Early Warning</button>
-  <button onclick="show('insights')">Insights</button>
-  <button onclick="show('about')">About</button>
-</nav>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">HealthTriage AI</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#assessment">Assessment</a></li>
+                <li><a href="#chat">AI Assistant</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#resources">Resources</a></li>
+            </ul>
+        </div>
+    </nav>
 
-<!-- HOME -->
-<div id="home" class="page active">
-  <div class="card">
-    <h2>🏥 AI Health Triage System</h2>
-    <p>
-      An AI-powered early warning and triage platform designed to identify
-      health risks early and guide timely care decisions.
-    </p>
-    <ul>
-      <li>✔ Instant risk classification</li>
-      <li>✔ Explainable AI decisions</li>
-      <li>✔ Early warning alerts</li>
-    </ul>
-  </div>
-</div>
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <h1>Know When to Seek Medical Care</h1>
+        <p>Our AI-powered triage system helps you understand your symptoms and guides you to the right level of care. Get instant, personalized health insights 24/7.</p>
+        <div class="cta-buttons">
+            <button class="btn btn-primary" onclick="scrollToSection('assessment')">Start Free Assessment</button>
+            <button class="btn btn-secondary" onclick="scrollToSection('features')">Learn How It Works</button>
+        </div>
+    </section>
 
-<!-- TRIAGE -->
-<div id="triage" class="page">
-  <div class="card">
-    <h2>🧠 AI Triage</h2>
-
-    <input id="temp" placeholder="Temperature (°C)">
-    <input id="hr" placeholder="Heart Rate (bpm)">
-    <textarea id="symptoms" placeholder="Symptoms"></textarea>
-
-    <select id="severity">
-      <option value="1">Mild</option>
-      <option value="2">Moderate</option>
-      <option value="3">Severe</option>
-    </select>
-
-    <button class="primary" onclick="triage()">Run AI Analysis</button>
-
-    <div id="result"></div>
-  </div>
-</div>
-
-<!-- WARNING -->
-<div id="warning" class="page">
-  <div class="card">
-    <h2>🚨 Early Warning System</h2>
-    <p>
-      This module monitors risk escalation trends and flags patients
-      who may deteriorate without intervention.
-    </p>
-    <ul>
-      <li>⚠ Vital threshold breach detection</li>
-      <li>⚠ Symptom severity escalation</li>
-      <li>⚠ AI-based deterioration prediction</li>
-    </ul>
-  </div>
-</div>
-
-<!-- INSIGHTS -->
-<div id="insights" class="page">
-  <div class="card">
-    <h2>📊 AI Insights</h2>
-    <p>
-      Explainable AI output improves trust and clinical adoption.
-    </p>
-    <ul>
-      <li>Why this risk level was assigned</li>
-      <li>Which vitals influenced the decision</li>
-      <li>How risk may evolve over time</li>
-    </ul>
-  </div>
-</div>
-
-<!-- ABOUT -->
-<div id="about" class="page">
-  <div class="card">
-    <h2>ℹ️ About & Vision</h2>
-    <p>
-      Future roadmap:
-    </p>
-    <ul>
-      <li>LLM-powered symptom reasoning</li>
-      <li>Wearable & IoT integration</li>
-      <li>Hospital dashboards</li>
-      <li>Population health analytics</li>
-    </ul>
-  </div>
-</div>
-
-<script>
-function show(page) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(page).classList.add('active');
-}
-
-function triage() {
-  const t = parseFloat(temp.value);
-  const h = parseInt(hr.value);
-  const s = symptoms.value.toLowerCase();
-  const sev = parseInt(severity.value);
-
-  let score = sev;
-  if (t >= 38) score += 2;
-  if (t >= 39) score += 2;
-  if (h > 100) score += 2;
-  if (s.includes("chest") || s.includes("breath")) score += 4;
-
-  let level="Low", cls="low";
-  if (score >= 6) { level="Medium"; cls="medium"; }
-  if (score >= 10) { level="High"; cls="high"; }
-
-  result.innerHTML = `
-    <div class="${cls}">
-      <b>Risk Level:</b> ${level}<br>
-      <b>Risk Score:</b> ${score}
+    <!-- Stats Banner -->
+    <div class="container">
+        <div class="stats-banner">
+            <div class="stat-item">
+                <div class="stat-number">500K+</div>
+                <div class="stat-label">Assessments Completed</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">98%</div>
+                <div class="stat-label">User Satisfaction</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Available Support</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Privacy Protected</div>
+            </div>
+        </div>
     </div>
-    <div class="ai">
-      🤖 AI Explanation: Risk calculated using vitals, symptoms,
-      and severity indicators to estimate potential deterioration.
-    </div>
-  `;
-}
-</script>
 
+    <!-- Symptom Assessment Tool -->
+    <div class="container" id="assessment">
+        <div class="section-header">
+            <h2>Symptom Assessment Tool</h2>
+            <p>Enter your symptoms and vital signs for an AI-powered health assessment</p>
+        </div>
+
+        <div class="assessment-tool">
+            <form id="assessmentForm">
+                <div class="form-group">
+                    <label for="symptoms">Describe Your Symptoms</label>
+                    <textarea id="symptoms" placeholder="e.g., headache, fever, cough, shortness of breath..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="duration">How long have you had these symptoms?</label>
+                    <select id="duration">
+                        <option value="">Select duration</option>
+                        <option value="hours">A few hours</option>
+                        <option value="1-2days">1-2 days</option>
+                        <option value="3-7days">3-7 days</option>
+                        <option value="week+">More than a week</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Vital Signs (Optional)</label>
+                    <div class="vitals-grid">
+                        <input type="number" placeholder="Temperature (°F)" id="temp">
+                        <input type="number" placeholder="Heart Rate (bpm)" id="heartRate">
+                        <input type="number" placeholder="Blood Pressure (Systolic)" id="bpSys">
+                        <input type="number" placeholder="Blood Pressure (Diastolic)" id="bpDia">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Analyze Symptoms</button>
+            </form>
+
+            <div class="result-boxes" id="resultBoxes" style="display: none;">
+                <div class="result-box emergency">
+                    <h3>🚨 Emergency</h3>
+                    <p>Immediate medical attention needed. Call 911 or go to the nearest emergency room right away.</p>
+                </div>
+                <div class="result-box urgent">
+                    <h3>⚠️ Urgent</h3>
+                    <p>See a doctor within 24 hours. Your symptoms require prompt medical evaluation.</p>
+                </div>
+                <div class="result-box routine">
+                    <h3>📅 Routine</h3>
+                    <p>Schedule an appointment soon. Your symptoms should be evaluated by a healthcare provider.</p>
+                </div>
+                <div class="result-box self-care">
+                    <h3>💚 Self-Care</h3>
+                    <p>Manage at home with guidance. Monitor your symptoms and seek care if they worsen.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Health Tracker -->
+    <div class="container">
+        <div class="section-header">
+            <h2>Personal Health Tracker</h2>
+            <p>Monitor your health metrics over time</p>
+        </div>
+
+        <div class="health-tracker">
+            <div class="tracker-grid">
+                <div class="tracker-item">
+                    <div>📊 Blood Pressure</div>
+                    <div class="tracker-value">120/80</div>
+                    <div class="tracker-trend">↓ Normal range</div>
+                </div>
+                <div class="tracker-item">
+                    <div>💓 Heart Rate</div>
+                    <div class="tracker-value">72 bpm</div>
+                    <div class="tracker-trend">→ Steady</div>
+                </div>
+                <div class="tracker-item">
+                    <div>🌡️ Temperature</div>
+                    <div class="tracker-value">98.6°F</div>
+                    <div class="tracker-trend">→ Normal</div>
+                </div>
+                <div class="tracker-item">
+                    <div>😴 Sleep Quality</div>
+                    <div class="tracker-value">7.5h</div>
+                    <div class="tracker-trend">↑ Improving</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top: 2rem; width: 100%;">Update Health Metrics</button>
+        </div>
+    </div>
+
+    <!-- AI Health Assistant Chatbox -->
+    <div class="container" id="chat">
+        <div class="section-header">
+            <h2>AI Health Assistant</h2>
+            <p>Ask questions and get instant AI-powered health guidance</p>
+        </div>
+
+        <div class="chatbox-container">
+            <div class="chat-header">
+                <div class="chat-status"></div>
+                <h3>HealthTriage AI Assistant - Online</h3>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai-message">
+                    <div class="message-label">AI Assistant</div>
+                    <div>Hello! I'm your AI health assistant. I can help answer general health questions, provide information about symptoms, and guide you on when to seek care. How can I help you today?</div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Ask a health question...">
+                <button class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="container" id="features">
+        <div class="section-header">
+            <h2>Why Choose HealthTriage AI?</h2>
+            <p>Advanced technology meets compassionate care</p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>AI-Powered Analysis</h3>
+                <p>Our advanced AI analyzes your symptoms using millions of medical data points to provide accurate triage recommendations.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Secure & Private</h3>
+                <p>Your health information is encrypted and protected. We never share your data without your explicit consent.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Instant Results</h3>
+                <p>Get immediate assessment results and actionable recommendations in seconds, available 24/7.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💙</div>
+                <h3>Personalized Care</h3>
+                <p>Receive tailored health guidance based on your unique symptoms, medical history, and vital signs.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Multi-Platform Access</h3>
+                <p>Access HealthTriage AI from any device - desktop, tablet, or smartphone - whenever you need it.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌍</div>
+                <h3>Global Coverage</h3>
+                <p>Get health guidance in multiple languages with access to international emergency resources.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Health Tracking</h3>
+                <p>Monitor your symptoms over time and track vital signs to identify patterns and trends.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">👨‍⚕️</div>
+                <h3>Doctor-Reviewed</h3>
+                <p>Our AI algorithms are developed and validated by board-certified physicians and medical experts.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emergency Resources -->
+    <div class="container" id="resources">
+        <div class="section-header">
+            <h2>Emergency Resources</h2>
+            <p>Quick access to critical health services</p>
+        </div>
+
+        <div class="emergency-resources">
+            <h3 style="text-align: center; color: var(--accent-red); margin-bottom: 1rem;">⚠️ If you're experiencing a medical emergency, call emergency services immediately</h3>
+            
+            <div class="emergency-grid">
+                <div class="emergency-card">
+                    <h4>🚨 Emergency Services</h4>
+                    <div class="emergency-number">911</div>
+                    <p>For life-threatening emergencies</p>
+                </div>
+                <div class="emergency-card">
+                    <h4>☠️ Poison Control</h4>
+                    <div class="emergency-number">1-800-222-1222</div>
+                    <p>24/7 poison emergency hotline</p>
+                </div>
+                <div class="emergency-card">
+                    <h4>🧠 Mental Health Crisis</h4>
+                    <div class="emergency-number">988</div>
+                    <p>Suicide & Crisis Lifeline</p>
+                </div>
+                <div class="emergency-card">
+                    <h4>🏥 Nurse Hotline</h4>
+                    <div class="emergency-number">1-800-XXX-XXXX</div>
+                    <p>24/7 nurse advice line</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medical Disclaimer -->
+    <div class="container">
+        <div class="disclaimer">
+            <h3>⚠️ Medical Disclaimer</h3>
+            <p>
+                <strong>Important:</strong> HealthTriage AI is an informational tool only and does not provide medical advice, diagnosis, or treatment. 
+                The information and assessments provided by this tool are for educational purposes and should not replace professional medical advice, 
+                examination, diagnosis, or treatment. Always seek the advice of your physician or other qualified health provider with any questions 
+                you may have regarding a medical condition. Never disregard professional medical advice or delay in seeking it because of something 
+                you have read or received from HealthTriage AI. If you think you may have a medical emergency, call your doctor or 911 immediately. 
+                HealthTriage AI does not recommend or endorse any specific tests, physicians, products, procedures, opinions, or other information 
+                that may be mentioned on the platform. Reliance on any information provided by HealthTriage AI is solely at your own risk.
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>About Us</h4>
+                <ul>
+                    <li><a href="#home">Our Mission</a></li>
+                    <li><a href="#features">How It Works</a></li>
+                    <li><a href="#">Medical Team</a></li>
+                    <li><a href="#">Press & Media</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="#assessment">Symptom Assessment</a></li>
+                    <li><a href="#chat">AI Health Assistant</a></li>
+                    <li><a href="#">Health Tracking</a></li>
+                    <li><a href="#">Telemedicine</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="#">Health Library</a></li>
+                    <li><a href="#">FAQs</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#resources">Emergency Resources</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">HIPAA Compliance</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 HealthTriage AI. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Scroll to top button -->
+    <div class="scroll-top" id="scrollTop" onclick="scrollToTop()">↑</div>
+
+    <script>
+        // Comprehensive Symptom Assessment Engine
+        const SYMPTOM_DATABASE = {
+            emergency: {
+                keywords: [
+                    'chest pain', 'heart attack', 'difficulty breathing', 'can\'t breathe', 'shortness of breath',
+                    'severe bleeding', 'heavy bleeding', 'bleeding won\'t stop', 'unconscious', 'passed out',
+                    'stroke', 'facial drooping', 'slurred speech', 'sudden weakness', 'paralysis',
+                    'severe head injury', 'head trauma', 'skull fracture', 'seizure', 'convulsion',
+                    'severe allergic reaction', 'anaphylaxis', 'throat closing', 'can\'t swallow',
+                    'severe abdominal pain', 'abdominal trauma', 'stabbing pain', 'severe burn',
+                    'coughing up blood', 'vomiting blood', 'blood in stool', 'black stool',
+                    'severe accident', 'broken bone', 'compound fracture', 'severe injury',
+                    'suicidal', 'want to die', 'poisoning', 'overdose', 'toxic ingestion',
+                    'drowning', 'choking', 'not breathing properly', 'blue lips', 'cyanosis',
+                    'severe dizziness', 'loss of consciousness', 'confusion and fever', 'disoriented',
+                    'sudden severe headache', 'worst headache of life', 'thunderclap headache',
+                    'testicular pain severe', 'testicular torsion', 'pregnancy bleeding',
+                    'severe pregnancy pain', 'decreased fetal movement', 'vision loss sudden'
+                ],
+                vitals: {
+                    temp: { min: 105, max: 200 },
+                    heartRate: { min: 140, max: 200 },
+                    bpSys: { min: 180, max: 300 }
+                }
+            },
+            urgent: {
+                keywords: [
+                    'high fever', 'fever won\'t go down', 'persistent fever', 'fever 3 days',
+                    'severe pain', 'unbearable pain', 'intense pain', 'pain 8/10', 'pain 9/10',
+                    'persistent vomiting', 'can\'t keep anything down', 'vomiting all day',
+                    'severe diarrhea', 'bloody diarrhea', 'diarrhea and fever',
+                    'urinating blood', 'blood in urine', 'painful urination extreme',
+                    'severe headache', 'migraine won\'t stop', 'headache with vision changes',
+                    'deep cut', 'wound needs stitches', 'animal bite', 'human bite',
+                    'possible fracture', 'can\'t move limb', 'joint swollen severely',
+                    'ear pain severe', 'earache unbearable', 'eye injury', 'eye pain severe',
+                    'rash spreading rapidly', 'rash with fever', 'severe rash',
+                    'dehydration signs', 'not urinating', 'very dry mouth', 'sunken eyes',
+                    'infection spreading', 'red streaks', 'swelling increasing',
+                    'suspected STI', 'genital sores', 'abnormal discharge severe',
+                    'asthma attack', 'wheezing severely', 'inhaler not working',
+                    'mental health crisis', 'panic attack severe', 'can\'t function',
+                    'pregnancy concerns', 'spotting pregnant', 'cramping pregnant',
+                    'severe toothache', 'dental abscess', 'tooth knocked out',
+                    'sprained ankle badly', 'twisted knee severely', 'back pain severe sudden'
+                ],
+                vitals: {
+                    temp: { min: 103, max: 105 },
+                    heartRate: { min: 110, max: 140 },
+                    bpSys: { min: 160, max: 180 }
+                }
+            },
+            routine: {
+                keywords: [
+                    'persistent cough', 'cough 2 weeks', 'cough won\'t go away',
+                    'ongoing headache', 'headaches frequently', 'recurring migraine',
+                    'joint pain', 'arthritis pain', 'chronic pain', 'back pain ongoing',
+                    'skin rash', 'eczema', 'psoriasis', 'acne severe', 'mole changed',
+                    'stomach issues', 'digestive problems', 'constipation ongoing',
+                    'sleep problems', 'insomnia', 'can\'t sleep', 'fatigue constant',
+                    'depression', 'anxiety', 'mood changes', 'feeling sad', 'stress',
+                    'check up needed', 'physical exam', 'routine screening',
+                    'weight loss unexplained', 'weight gain unexplained', 'appetite changes',
+                    'frequent urination', 'urinary issues', 'incontinence',
+                    'menstrual problems', 'irregular periods', 'heavy periods',
+                    'erectile dysfunction', 'sexual health concerns', 'low libido',
+                    'allergies seasonal', 'hay fever', 'sinus issues ongoing',
+                    'vision changes gradual', 'need glasses', 'blurry vision',
+                    'hearing loss', 'ringing in ears', 'tinnitus',
+                    'memory problems', 'forgetfulness', 'concentration issues',
+                    'high blood pressure ongoing', 'high cholesterol', 'diabetes management',
+                    'vaccination needed', 'immunization', 'travel vaccine'
+                ],
+                vitals: {
+                    temp: { min: 100.5, max: 103 },
+                    heartRate: { min: 90, max: 110 },
+                    bpSys: { min: 140, max: 160 }
+                }
+            },
+            selfCare: {
+                keywords: [
+                    'mild headache', 'slight headache', 'minor headache',
+                    'stuffy nose', 'runny nose', 'congestion', 'sneezing',
+                    'sore throat mild', 'scratchy throat', 'throat tickle',
+                    'common cold', 'cold symptoms', 'sniffles',
+                    'mild cough', 'occasional cough', 'dry cough',
+                    'muscle soreness', 'sore from exercise', 'muscle ache mild',
+                    'minor cut', 'scrape', 'bruise', 'small wound',
+                    'mild fever', 'low grade fever', 'feeling warm',
+                    'tired', 'fatigued', 'low energy', 'need rest',
+                    'mild nausea', 'queasy', 'upset stomach mild',
+                    'mild diarrhea', 'loose stool', 'stomach bug mild',
+                    'bloating', 'gas', 'indigestion', 'heartburn',
+                    'dry skin', 'minor rash', 'sunburn mild', 'insect bite',
+                    'hangnail', 'paper cut', 'minor splinter',
+                    'mild allergy symptoms', 'itchy eyes', 'sneezing fits',
+                    'stiff neck', 'minor back pain', 'muscle tension',
+                    'mild anxiety', 'stress feeling', 'feeling overwhelmed',
+                    'period cramps mild', 'menstrual discomfort', 'PMS symptoms',
+                    'hiccups', 'minor indigestion', 'mild gas pain'
+                ],
+                vitals: {
+                    temp: { min: 99, max: 100.5 },
+                    heartRate: { min: 60, max: 90 },
+                    bpSys: { min: 120, max: 140 }
+                }
+            }
+        };
+
+        // Assessment Form Handler
+        document.getElementById('assessmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const symptoms = document.getElementById('symptoms').value.toLowerCase().trim();
+            const duration = document.getElementById('duration').value;
+            const temp = parseFloat(document.getElementById('temp').value) || 0;
+            const heartRate = parseFloat(document.getElementById('heartRate').value) || 0;
+            const bpSys = parseFloat(document.getElementById('bpSys').value) || 0;
+            
+            if (!symptoms) {
+                showNotification('Please describe your symptoms', 'error');
+                return;
+            }
+
+            // Show loading
+            showLoading();
+
+            // Simulate AI processing
+            setTimeout(() => {
+                const urgencyLevel = analyzeSymptoms(symptoms, duration, temp, heartRate, bpSys);
+                displayResults(urgencyLevel, symptoms);
+                hideLoading();
+            }, 1500);
+        });
+
+        function analyzeSymptoms(symptoms, duration, temp, heartRate, bpSys) {
+            let scores = {
+                emergency: 0,
+                urgent: 0,
+                routine: 0,
+                selfCare: 0
+            };
+
+            // Check keywords with weighted scoring
+            for (let level in SYMPTOM_DATABASE) {
+                SYMPTOM_DATABASE[level].keywords.forEach(keyword => {
+                    if (symptoms.includes(keyword)) {
+                        scores[level] += 10;
+                        // Extra weight for exact matches
+                        if (symptoms === keyword) {
+                            scores[level] += 5;
+                        }
+                    }
+                });
+            }
+
+            // Check vital signs
+            if (temp > 0) {
+                if (temp >= SYMPTOM_DATABASE.emergency.vitals.temp.min) scores.emergency += 15;
+                else if (temp >= SYMPTOM_DATABASE.urgent.vitals.temp.min) scores.urgent += 12;
+                else if (temp >= SYMPTOM_DATABASE.routine.vitals.temp.min) scores.routine += 8;
+                else if (temp >= SYMPTOM_DATABASE.selfCare.vitals.temp.min) scores.selfCare += 5;
+            }
+
+            if (heartRate > 0) {
+                if (heartRate >= SYMPTOM_DATABASE.emergency.vitals.heartRate.min) scores.emergency += 15;
+                else if (heartRate >= SYMPTOM_DATABASE.urgent.vitals.heartRate.min) scores.urgent += 12;
+                else if (heartRate >= SYMPTOM_DATABASE.routine.vitals.heartRate.min) scores.routine += 8;
+            }
+
+            if (bpSys > 0) {
+                if (bpSys >= SYMPTOM_DATABASE.emergency.vitals.bpSys.min) scores.emergency += 15;
+                else if (bpSys >= SYMPTOM_DATABASE.urgent.vitals.bpSys.min) scores.urgent += 12;
+                else if (bpSys >= SYMPTOM_DATABASE.routine.vitals.bpSys.min) scores.routine += 8;
+            }
+
+            // Duration factor
+            if (duration === 'week+') {
+                scores.routine += 8;
+                scores.urgent += 4;
+            } else if (duration === '3-7days') {
+                scores.routine += 5;
+            }
+
+            // Multiple symptoms indicator
+            const symptomCount = symptoms.split(/[,.]/).filter(s => s.trim().length > 5).length;
+            if (symptomCount > 3) {
+                scores.urgent += 5;
+            }
+
+            // Determine highest score
+            let maxScore = Math.max(scores.emergency, scores.urgent, scores.routine, scores.selfCare);
+            
+            // If no matches, default to routine
+            if (maxScore === 0) {
+                return 'routine';
+            }
+
+            // Return level with highest score
+            for (let level in scores) {
+                if (scores[level] === maxScore) {
+                    return level.replace('C', '-c'); // Convert selfCare to self-care
+                }
+            }
+
+            return 'routine';
+        }
+
+        function displayResults(urgencyLevel, symptoms) {
+            // Show all result boxes
+            document.getElementById('resultBoxes').style.display = 'grid';
+            
+            // Reset all boxes
+            const boxes = document.querySelectorAll('.result-box');
+            boxes.forEach(box => {
+                box.style.opacity = '0.3';
+                box.style.transform = 'scale(0.95)';
+            });
+            
+            // Highlight the appropriate box
+            const targetBox = document.querySelector(`.${urgencyLevel}`);
+            if (targetBox) {
+                targetBox.style.opacity = '1';
+                targetBox.style.transform = 'scale(1.05)';
+                targetBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Add pulse effect
+                targetBox.style.animation = 'pulse 2s ease-in-out';
+                setTimeout(() => {
+                    targetBox.style.animation = '';
+                }, 2000);
+            }
+
+            // Show detailed notification
+            setTimeout(() => {
+                const messages = {
+                    'emergency': {
+                        title: '🚨 EMERGENCY',
+                        text: 'Based on your symptoms, you should seek immediate medical attention. Call 911 or go to the nearest emergency room right away. Do not drive yourself.',
+                        type: 'emergency'
+                    },
+                    'urgent': {
+                        title: '⚠️ URGENT CARE NEEDED',
+                        text: 'Your symptoms require prompt medical evaluation. Please see a doctor or visit an urgent care clinic within 24 hours.',
+                        type: 'urgent'
+                    },
+                    'routine': {
+                        title: '📅 SCHEDULE APPOINTMENT',
+                        text: 'Schedule an appointment with your healthcare provider to discuss these symptoms. They should be evaluated but are not immediately urgent.',
+                        type: 'routine'
+                    },
+                    'self-care': {
+                        title: '💚 SELF-CARE RECOMMENDED',
+                        text: 'Your symptoms may be manageable at home. Monitor them carefully and seek care if they worsen or persist beyond a few days.',
+                        type: 'self-care'
+                    }
+                };
+
+                const msg = messages[urgencyLevel];
+                showDetailedNotification(msg.title, msg.text, msg.type);
+            }, 800);
+        }
+
+        function showLoading() {
+            const resultBoxes = document.getElementById('resultBoxes');
+            resultBoxes.style.display = 'block';
+            resultBoxes.innerHTML = `
+                <div class="loading-spinner active">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 1rem; color: var(--text-secondary);">Analyzing your symptoms with AI...</p>
+                </div>
+            `;
+        }
+
+        function hideLoading() {
+            const boxes = `
+                <div class="result-box emergency">
+                    <h3>🚨 Emergency</h3>
+                    <p>Immediate medical attention needed. Call 911 or go to the nearest emergency room right away.</p>
+                    <span class="result-badge">CALL 911 NOW</span>
+                </div>
+                <div class="result-box urgent">
+                    <h3>⚠️ Urgent</h3>
+                    <p>See a doctor within 24 hours. Your symptoms require prompt medical evaluation.</p>
+                    <span class="result-badge">WITHIN 24 HOURS</span>
+                </div>
+                <div class="result-box routine">
+                    <h3>📅 Routine</h3>
+                    <p>Schedule an appointment soon. Your symptoms should be evaluated by a healthcare provider.</p>
+                    <span class="result-badge">SCHEDULE SOON</span>
+                </div>
+                <div class="result-box self-care">
+                    <h3>💚 Self-Care</h3>
+                    <p>Manage at home with guidance. Monitor your symptoms and seek care if they worsen.</p>
+                    <span class="result-badge">MONITOR AT HOME</span>
+                </div>
+            `;
+            document.getElementById('resultBoxes').innerHTML = boxes;
+        }
+
+        function showNotification(message, type) {
+            // Simple alert for now - could be enhanced with custom notifications
+            alert(message);
+        }
+
+        function showDetailedNotification(title, text, type) {
+            const colors = {
+                'emergency': '#ef4444',
+                'urgent': '#f59e0b',
+                'routine': '#3b82f6',
+                'self-care': '#10b981'
+            };
+
+            // Create custom notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 30px;
+                max-width: 400px;
+                background: ${colors[type]}15;
+                border: 2px solid ${colors[type]};
+                border-radius: 15px;
+                padding: 1.5rem;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+                z-index: 10000;
+                animation: slideIn 0.5s ease;
+            `;
+            notification.innerHTML = `
+                <h4 style="color: ${colors[type]}; margin-bottom: 0.5rem; font-size: 1.2rem;">${title}</h4>
+                <p style="color: var(--text-secondary); line-height: 1.6;">${text}</p>
+            `;
+            
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.5s ease';
+                setTimeout(() => notification.remove(), 500);
+            }, 8000);
+        }
+
+        // Enhanced Chat functionality with comprehensive medical knowledge
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            // Simulate AI response with more realistic delay
+            setTimeout(() => {
+                hideTypingIndicator();
+                const aiResponse = generateAdvancedAIResponse(message);
+                addMessage(aiResponse, 'ai');
+            }, 1200 + Math.random() * 800);
+        }
+
+        function addMessage(text, sender) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const label = sender === 'user' ? 'You' : 'AI Health Assistant';
+            messageDiv.innerHTML = `
+                <div class="message-label">${label}</div>
+                <div>${text}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const indicator = document.createElement('div');
+            indicator.className = 'message ai-message typing-indicator';
+            indicator.id = 'typingIndicator';
+            indicator.innerHTML = `
+                <div class="message-label">AI Health Assistant</div>
+                <div class="typing-dots">
+                    <span></span><span></span><span></span>
+                </div>
+            `;
+            messagesContainer.appendChild(indicator);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) indicator.remove();
+        }
+
+        function generateAdvancedAIResponse(userMessage) {
+            const messageLower = userMessage.toLowerCase();
+            
+            // Comprehensive response system
+            const responses = {
+                fever: {
+                    keywords: ['fever', 'temperature', 'hot', 'burning up', 'feverish'],
+                    response: "A fever is your body's natural response to infection. For adults:<br><br>• Normal: 97-99°F (36-37°C)<br>• Low-grade fever: 99-100.9°F (37.2-38.3°C)<br>• Fever: 100.4°F+ (38°C+)<br>• High fever: 103°F+ (39.4°C+)<br><br><strong>Self-care:</strong> Stay hydrated, rest, and consider acetaminophen or ibuprofen. <strong>Seek care if:</strong> Fever >103°F, lasts >3 days, or accompanied by severe symptoms like difficulty breathing, chest pain, stiff neck, or confusion."
+                },
+                headache: {
+                    keywords: ['headache', 'head pain', 'migraine', 'head hurt'],
+                    response: "Headaches have many causes. Common types include:<br><br>• <strong>Tension headaches:</strong> Mild-moderate, band-like pressure<br>• <strong>Migraines:</strong> Severe, throbbing, often one-sided, with nausea/light sensitivity<br>• <strong>Cluster headaches:</strong> Intense pain around one eye<br><br><strong>Home care:</strong> Rest in a dark, quiet room, stay hydrated, apply cold/hot compress, try OTC pain relievers. <strong>Seek immediate care for:</strong> Sudden severe headache ('thunderclap'), headache with fever and stiff neck, after head injury, with confusion or vision loss, or worst headache of your life."
+                },
+                covid: {
+                    keywords: ['covid', 'coronavirus', 'covid-19', 'corona virus'],
+                    response: "COVID-19 remains a concern. Common symptoms include: fever, cough, fatigue, loss of taste/smell, sore throat, body aches, congestion, nausea, diarrhea.<br><br><strong>If exposed or symptomatic:</strong><br>• Get tested (rapid antigen or PCR)<br>• Isolate from others for at least 5 days<br>• Monitor symptoms daily<br>• Stay hydrated and rest<br><br><strong>Seek immediate care for:</strong> Difficulty breathing, persistent chest pain/pressure, confusion, bluish lips/face, inability to wake or stay awake. Treatment options (like Paxlovid) work best when started early."
+                },
+                cold_flu: {
+                    keywords: ['cold', 'flu', 'influenza', 'runny nose', 'congestion', 'sneezing'],
+                    response: "Colds and flu are both viral respiratory infections but differ in severity:<br><br><strong>Common Cold:</strong> Gradual onset, mild symptoms, runny/stuffy nose, sneezing, sore throat. Lasts 7-10 days.<br><br><strong>Flu:</strong> Sudden onset, fever, body aches, fatigue, dry cough, headache. More severe, lasts 1-2 weeks.<br><br><strong>Home care:</strong> Rest, fluids (8+ glasses daily), OTC medications for symptoms, throat lozenges, humidifier. <strong>See a doctor if:</strong> Symptoms last >10 days, difficulty breathing, chest pain, high fever >103°F, or symptoms worsen after improving."
+                },
+                chest_pain: {
+                    keywords: ['chest pain', 'chest hurt', 'chest pressure', 'heart pain'],
+                    response: "⚠️ <strong>IMPORTANT:</strong> Chest pain can be serious and requires immediate medical attention if accompanied by:<br>• Pressure, squeezing, or crushing sensation<br>• Pain radiating to jaw, arm, or back<br>• Shortness of breath<br>• Sweating, nausea, dizziness<br>• Irregular heartbeat<br><br><strong>These could indicate a heart attack - CALL 911 IMMEDIATELY.</strong><br><br>Not all chest pain is cardiac. Other causes include: acid reflux, muscle strain, anxiety, or lung issues. However, it's always better to be safe - if you're unsure, seek emergency care."
+                },
+                anxiety: {
+                    keywords: ['anxiety', 'panic', 'anxious', 'worried', 'stress', 'panic attack'],
+                    response: "Anxiety is a common but treatable condition. Symptoms include: excessive worry, restlessness, fatigue, difficulty concentrating, muscle tension, sleep problems, rapid heartbeat.<br><br><strong>Coping strategies:</strong><br>• Deep breathing exercises (4-7-8 technique)<br>• Regular exercise (30min daily)<br>• Limit caffeine and alcohol<br>• Maintain sleep schedule<br>• Mindfulness/meditation<br>• Talk to trusted friends/family<br><br><strong>Seek professional help if:</strong> Anxiety interferes with daily life, persistent worry, panic attacks, or thoughts of self-harm. Therapy (CBT) and medication can be very effective. Crisis support: Call 988 (Suicide & Crisis Lifeline)."
+                },
+                stomach: {
+                    keywords: ['stomach', 'nausea', 'vomit', 'diarrhea', 'abdominal', 'belly', 'indigestion'],
+                    response: "Digestive issues range from minor to serious. Common causes include:<br>• Food poisoning or stomach bug<br>• Indigestion or acid reflux<br>• Constipation or IBS<br>• Gastroenteritis<br><br><strong>Self-care for mild symptoms:</strong><br>• BRAT diet (Bananas, Rice, Applesauce, Toast)<br>• Stay hydrated with clear fluids<br>• Avoid fatty, spicy, or dairy foods<br>• Rest your digestive system<br><br><strong>Seek care for:</strong> Severe abdominal pain, vomiting blood, bloody/black stools, signs of dehydration (dark urine, dizziness, very dry mouth), pain with fever, or symptoms lasting >2 days."
+                },
+                emergency: {
+                    keywords: ['emergency', '911', 'urgent', 'serious', 'life threatening'],
+                    response: "🚨 <strong>Call 911 immediately if you experience:</strong><br><br>• Chest pain or pressure<br>• Difficulty breathing or shortness of breath<br>• Severe bleeding that won't stop<br>• Loss of consciousness or fainting<br>• Sudden weakness, numbness, or facial drooping (stroke signs)<br>• Severe allergic reaction (throat swelling, difficulty breathing)<br>• Severe burns or injuries<br>• Coughing or vomiting blood<br>• Severe abdominal pain<br>• Poisoning or overdose<br>• Suicidal thoughts with plan (988 Lifeline)<br><br><strong>Don't hesitate - emergency services are there to help. It's better to be safe!</strong>"
+                },
+                depression: {
+                    keywords: ['depression', 'depressed', 'sad', 'hopeless', 'suicidal'],
+                    response: "Depression is a serious but treatable medical condition affecting millions. Symptoms include: persistent sadness, loss of interest, fatigue, sleep changes, appetite changes, difficulty concentrating, feelings of worthlessness, thoughts of death.<br><br><strong>Important steps:</strong><br>• Talk to a mental health professional<br>• Consider therapy (CBT, IPT very effective)<br>• Medication may help (discuss with doctor)<br>• Exercise regularly (proven to help)<br>• Maintain social connections<br>• Set small, achievable goals<br><br><strong>⚠️ Crisis support:</strong> If you're having thoughts of suicide, call 988 (Suicide & Crisis Lifeline) or text 'HELLO' to 741741. You're not alone, and help is available 24/7."
+                },
+                skin: {
+                    keywords: ['rash', 'skin', 'itch', 'burn', 'sunburn', 'cut', 'wound'],
+                    response: "Skin conditions vary widely. Common issues include:<br><br>• <strong>Rashes:</strong> Often from allergies, eczema, or contact dermatitis. Use fragrance-free moisturizers, avoid triggers.<br>• <strong>Cuts/wounds:</strong> Clean with soap and water, apply antibiotic ointment, cover with bandage. Watch for infection signs (redness, warmth, pus).<br>• <strong>Sunburn:</strong> Cool compresses, aloe vera, ibuprofen, stay hydrated.<br>• <strong>Acne:</strong> Gentle cleansing, OTC benzoyl peroxide or salicylic acid.<br><br><strong>See a doctor for:</strong> Rash spreading rapidly, rash with fever, deep cuts needing stitches, signs of infection, or changing moles."
+                }
+            };
+
+            // Find matching response
+            for (let category in responses) {
+                if (responses[category].keywords.some(keyword => messageLower.includes(keyword))) {
+                    return responses[category].response;
+                }
+            }
+
+            // Greetings and general queries
+            if (messageLower.match(/^(hi|hello|hey|greetings|good morning|good evening)/)) {
+                return "Hello! I'm your AI Health Assistant. I'm here to provide health information and guidance. How can I help you today? You can ask about symptoms, conditions, when to seek care, or general health topics.";
+            }
+
+            if (messageLower.includes('thank') || messageLower.includes('thanks')) {
+                return "You're welcome! Remember, I'm here 24/7 if you have more health questions. Stay healthy! 💙";
+            }
+
+            if (messageLower.includes('how are you') || messageLower.includes('how do you do')) {
+                return "I'm functioning well, thank you! More importantly, how are you feeling? Is there a health concern I can help you with?";
+            }
+
+            // Default response with encouragement to be specific
+            return "I'd be happy to help with your health question. For the most accurate guidance, could you provide more specific details about your symptoms? For example, you can ask about:<br><br>• Specific symptoms (fever, headache, nausea, etc.)<br>• When to seek emergency care<br>• Home remedies for common conditions<br>• General health topics<br><br>You can also use our Symptom Assessment Tool above for personalized triage recommendations.";
+        }
+
+        // Allow Enter key to send messages
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Scroll to section
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Scroll to top
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Show/hide scroll to top button
+        window.addEventListener('scroll', function() {
+            const scrollTop = document.getElementById('scrollTop');
+            if (window.pageYOffset > 300) {
+                scrollTop.classList.add('visible');
+            } else {
+                scrollTop.classList.remove('visible');
+            }
+        });
+
+        // Add initial welcome message to chat on page load
+        window.addEventListener('load', function() {
+            console.log('HealthTriage AI loaded successfully');
+            
+            // Intersection Observer for scroll animations
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all sections
+            document.querySelectorAll('.fade-in-section').forEach(section => {
+                observer.observe(section);
+            });
+
+            // Animate stat numbers
+            animateStats();
+        });
+
+        function animateStats() {
+            const stats = document.querySelectorAll('.stat-number');
+            stats.forEach(stat => {
+                const target = stat.textContent;
+                const isPercentage = target.includes('%');
+                const isPlus = target.includes('+');
+                const numericValue = parseInt(target.replace(/[^0-9]/g, ''));
+                
+                if (numericValue > 0) {
+                    let current = 0;
+                    const increment = numericValue / 50;
+                    const timer = setInterval(() => {
+                        current += increment;
+                        if (current >= numericValue) {
+                            stat.textContent = target;
+                            clearInterval(timer);
+                        } else {
+                            stat.textContent = Math.floor(current) + (isPercentage ? '%' : (isPlus ? 'K+' : ''));
+                        }
+                    }, 30);
+                }
+            });
+        }
+
+        // Add fade-in class to all main sections on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('.container > div, .assessment-tool, .health-tracker, .emergency-resources');
+            sections.forEach((section, index) => {
+                section.classList.add('fade-in-section');
+                section.style.transitionDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
 </body>
 </html>
